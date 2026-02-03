@@ -71,9 +71,9 @@ const AdminAddProduct = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Prix */}
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Prix de vente (€)</label>
+              <label className="text-sm font-bold text-slate-700 ml-1">Prix de vente (CFA)</label>
               <div className="relative flex items-center">
-                <span className="absolute left-4 text-slate-400 font-bold">CFA</span>
+                <span className="absolute left-4 text-slate-400 font-bold">F</span>
                 <input required type="number" step="0.01" placeholder="0.00" 
                   className="w-full bg-slate-50 border-none ring-1 ring-slate-200 focus:ring-2 focus:ring-indigo-500 rounded-xl p-3 pl-8 outline-none"
                   value={formData.price}
