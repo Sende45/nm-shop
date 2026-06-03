@@ -1,4 +1,21 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+@theme {
+  /* Ta charte graphique haut de gamme */
+  --color-brand-primary: #10b981;  /* Vert émeraude */
+  --color-brand-hover: #059669;    /* Vert bouton */
+  --color-brand-dark: #064e3b;     /* Vert forêt luxe */
+  --color-brand-gold: #d97706;     /* Or premium */
+  --color-brand-light: #f0fdf4;    /* Fond clair */
+}
+
+@layer base {
+  body {
+    @apply antialiased text-slate-600 bg-white;
+  }
+  
+  ::selection {
+    background-color: #f0fdf4 !important;
+    color: #059669 !important;
+  }
+}

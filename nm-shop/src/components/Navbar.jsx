@@ -1,84 +1,156 @@
 import React, { useState, useEffect } from 'react';
-import { Search, ShoppingBag, User, Menu, X, ChevronDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, ShoppingBag, Menu, X, Phone, BookOpen, Layers } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useShop } from '../context/ShopContext';
 
 const Navbar = () => {
+  const { cart } = useShop();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Effet de scroll pour changer l'apparence au défilement
+  const totalItems = cart?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleSearchSubmit = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      setIsMobileMenuOpen(false);
+      navigate(`/catalogue?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const isActive = (path) => location.pathname === path;
+
   return (
     <nav className={`sticky top-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-white shadow-lg py-2' : 'bg-white/90 backdrop-blur-md py-4'
-    } border-b border-slate-100`}>
-      <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
+      isScrolled ? 'bg-white shadow-md py-2' : 'bg-white py-4'
+    } border-b border-slate-100/80 font-['Gitaluevo'] selection:bg-[#1A6D00] selection:text-white`}>
+      <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between gap-4">
         
-        {/* LOGO avec Animation */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform duration-300 shadow-lg shadow-indigo-200">
-            <span className="text-white font-black text-xl">N</span>
+        {/* LOGO BOUTON AVEC TON LIEN DIRECT EXACT DE L'IMAGE */}
+        <Link to="/" className="flex items-center group shrink-0 focus:outline-none" title="Accueil NoMar">
+          <div className="h-12 md:h-14 flex items-center transition-transform duration-200 active:scale-95">
+            <img 
+              src="https://i.ibb.co/KxCBDR2R/logo-nomar.jpg" 
+              alt="Logo NoMar" 
+              className="h-full w-auto object-contain mix-blend-multiply"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                const container = e.target.parentNode;
+                if (container && !container.querySelector('.fallback-logo')) {
+                  const fallback = document.createElement('span');
+                  fallback.className = 'fallback-logo text-2xl font-black text-[#1A6D00] tracking-tight uppercase';
+                  fallback.innerText = 'NOMAR';
+                  container.appendChild(fallback);
+                }
+              }}
+            />
           </div>
-          <span className="text-2xl font-black text-slate-900 tracking-tighter hidden sm:block">
-            NM<span className="text-indigo-600">-SHOP</span>
-          </span>
         </Link>
 
-        {/* NAVIGATION CENTRALE (Desktop) */}
+        {/* NAVIGATION DESKTOP */}
         <div className="hidden lg:flex items-center gap-8">
-          {['Nouveautés', 'Terroir', 'Promotions', 'Expertise'].map((item) => (
-            <a key={item} href={`#${item.toLowerCase()}`} 
-               className="relative text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors group">
-              {item}
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-600 transition-all group-hover:w-full"></span>
-            </a>
+          {[
+            { name: 'Catalogue', path: '/catalogue', icon: <Layers size={14} /> },
+            { name: 'Notre Histoire', path: '/a-propos', icon: <BookOpen size={14} /> },
+            { name: 'Contactez-nous', path: '/contact', icon: <Phone size={14} /> }
+          ].map((item) => (
+            <Link 
+              key={item.name} 
+              to={item.path} 
+              className={`relative text-[13px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-colors duration-200 py-1 ${
+                isActive(item.path) ? 'text-[#1A6D00]' : 'text-slate-500 hover:text-[#1A6D00]'
+              }`}
+            >
+              {item.icon}
+              {item.name}
+              <span className={`absolute bottom-0 left-0 h-0.5 bg-[#1A6D00] transition-all duration-200 ${
+                isActive(item.path) ? 'w-full' : 'w-0'
+              }`}></span>
+            </Link>
           ))}
         </div>
         
-        {/* ACTIONS & RECHERCHE */}
-        <div className="flex items-center gap-2 sm:gap-6 text-slate-700">
-          
-          {/* Barre de recherche discrète mais efficace */}
-          <div className="hidden md:flex items-center bg-slate-100 rounded-full px-4 py-2 border border-transparent focus-within:border-indigo-300 focus-within:bg-white transition-all">
-            <Search size={18} className="text-slate-400" />
-            <input type="text" placeholder="Rechercher..." className="bg-transparent border-none focus:ring-0 text-sm w-32 xl:w-48 ml-2" />
+        {/* BARRE DE RECHERCHE, BOUTON WHATSAPP & PANIER */}
+        <div className="flex items-center gap-2 sm:gap-4 text-slate-700 flex-1 md:flex-none justify-end">
+          <div className="hidden md:flex items-center bg-slate-50/80 rounded-xl px-4 py-2 border border-slate-100/80 focus-within:border-[#1A6D00]/30 focus-within:bg-white focus-within:shadow-xs transition-all duration-200">
+            <Search size={15} className="text-slate-400" />
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchSubmit}
+              placeholder="Rechercher une variété de riz..." 
+              className="bg-transparent border-none outline-none focus:ring-0 text-xs w-44 xl:w-60 ml-2 text-brand-dark font-semibold placeholder-slate-400" 
+            />
           </div>
 
-          <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-slate-100 rounded-full transition-colors relative group">
-              <User size={22} className="group-hover:text-indigo-600" />
-            </button>
-
-            <Link to="/panier" className="p-2 hover:bg-slate-100 rounded-full transition-colors relative group">
-              <ShoppingBag size={22} className="group-hover:text-indigo-600" />
-              <span className="absolute top-1 right-1 bg-green-500 text-white text-[10px] font-black h-4 w-4 flex items-center justify-center rounded-full border-2 border-white">
-                0
+          <div className="flex items-center gap-1 shrink-0">
+            {/* NOVEAU : BOUTON WHATSAPP NOMAR DIRECT (Remplaçant de l'icône Homme) */}
+            <a 
+              href="https://wa.me/2250759777796" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              title="Discuter sur WhatsApp"
+              className="p-2.5 rounded-xl transition-all duration-200 hover:bg-emerald-50 text-slate-500 hover:text-[#1A6D00] flex items-center justify-center relative group"
+            >
+              {/* Bulle SVG personnalisée WhatsApp pour un look épuré et moderne */}
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+              {/* Effet d'indication au survol de la souris */}
+              <span className="absolute bottom-full mb-2 hidden group-hover:block bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-md font-bold tracking-wide whitespace-nowrap">
+                WhatsApp NoMar
               </span>
+            </a>
+
+            <Link to="/panier" className={`p-2.5 rounded-xl transition-all duration-200 relative flex items-center justify-center group ${isActive('/panier') ? 'bg-[#1A6D00]/10 text-[#1A6D00]' : 'hover:bg-slate-50 text-slate-500 hover:text-[#1A6D00]'}`}>
+              <ShoppingBag size={19} />
+              {totalItems > 0 && (
+                <span className="absolute top-1 right-1 bg-[#D4A373] text-white text-[9px] font-black h-4 w-4 flex items-center justify-center rounded-full border-2 border-white">
+                  {totalItems}
+                </span>
+              )}
             </Link>
 
-            {/* BOUTON MENU MOBILE */}
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden p-2 hover:bg-slate-100 rounded-full">
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden p-2 hover:bg-slate-50 text-slate-500 rounded-xl cursor-pointer">
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* MENU MOBILE (Apparaît au clic) */}
+      {/* MENU MOBILE */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 w-full bg-white border-b border-slate-100 animate-in slide-in-from-top p-6 flex flex-col gap-4">
-          <input type="text" placeholder="Rechercher un produit..." className="w-full bg-slate-100 rounded-xl p-3 outline-none" />
-          <div className="flex flex-col gap-4 font-bold text-slate-800">
-            <a href="#">Nouveautés</a>
-            <a href="#">Terroir</a>
-            <a href="#">Promotions</a>
-            <hr />
-            <Link to="/admin" className="text-indigo-600">Espace Admin</Link>
+        <div className="lg:hidden absolute top-full left-0 w-full bg-white border-b border-slate-100 p-6 flex flex-col gap-5 shadow-xl">
+          <div className="flex items-center bg-slate-50 rounded-xl px-4 py-3 border border-slate-100">
+            <Search size={18} className="text-slate-400" />
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchSubmit}
+              placeholder="Rechercher sur NoMar..." 
+              className="bg-transparent border-none outline-none text-sm w-full ml-2 font-semibold" 
+            />
+          </div>
+          <div className="flex flex-col gap-4 font-black uppercase tracking-wider text-slate-600 text-xs">
+            <Link to="/catalogue" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#1A6D00] py-1 flex items-center gap-2"><Layers size={14}/> Catalogue complet</Link>
+            <Link to="/a-propos" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#1A6D00] py-1 flex items-center gap-2"><BookOpen size={14}/> Notre Histoire</Link>
+            <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#1A6D00] py-1 flex items-center gap-2"><Phone size={14}/> Nous Contacter</Link>
+            <a href="https://wa.me/2250759777796" target="_blank" rel="noopener noreferrer" onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#1A6D00] py-1 flex items-center gap-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+              Nous écrire sur WhatsApp
+            </a>
           </div>
         </div>
       )}
