@@ -1,59 +1,48 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+// Importation de ton instance Firebase configurée côté Frontend Vercel
+import { db } from '../firebase/config'; 
+import { collection, onSnapshot } from 'firebase/firestore';
 
 // Création du contexte
 const ShopContext = createContext();
 
 export const ShopProvider = ({ children }) => {
-  // LISTE DE PRODUITS EXTENSIBLE & PREMIUM - IDENTITY OFFICIAL NOMAR
-  const [products] = useState([
-    { 
-      id: 1, 
-      name: "Riz Jasmin Parfumé Luxe (Mémé Extra) - 25KG", 
-      price: 18500, 
-      category: "Riz Parfumé",
-      weight: 25, // 👈 Poids pour le panneau de filtres dynamique
-      description: "Grain long poli, parfum naturel intense à la cuisson. Idéal pour vos repas de fête et grandes réceptions à Abidjan.",
-      imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=600" 
-    },
-    { 
-      id: 2, 
-      name: "Brisure Premium 1er Choix (Oiseau de Paradis) - 22.5KG", 
-      price: 14000, 
-      category: "Local & Brisure",
-      weight: 22.5, // 👈 Poids exact demandé
-      description: "Brisures fines sélectionnées grain par grain, parfaites pour réussir un Tchep ou un Riz au gras d'exception.",
-      imageUrl: "https://images.unsplash.com/photo-1536657464919-892534f60d6e?auto=format&fit=crop&q=80&w=600" 
-    },
-    { 
-      id: 3, 
-      name: "Riz Local Riziculteurs de Man - 10KG", 
-      price: 6500, 
-      category: "Terroir Local",
-      weight: 10, // 👈 Poids exact demandé
-      description: "Riz de terroir 100% ivoirien, riche en nutriments et cultivé de manière écoresponsable à Man.",
-      imageUrl: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?q=80&w=600" 
-    },
-    { 
-      id: 4, 
-      name: "Riz Parfumé Royal Élite - 5KG", 
-      price: 3800, 
-      category: "Riz Parfumé",
-      weight: 5, // 👈 Poids exact demandé
-      description: "Format pratique et compact, idéal pour les jeunes foyers ou pour tester la qualité supérieure NoMar.",
-      imageUrl: "https://images.unsplash.com/photo-1590005354167-6da97870c913?q=80&w=600" 
-    },
-    { 
-      id: 5, 
-      name: "Format Familial Éco Giga Sac - 50KG", 
-      price: 29000, 
-      category: "Gros Formats",
-      weight: 50, // 👈 Poids exact demandé
-      description: "Le meilleur rendement économique pour nourrir toute la maisonnée au meilleur tarif de Côte d'Ivoire.",
-      imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=600" 
-    }
-  ]);
-
+  const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // -------------------------------------------------------------------------
+  // LIAISON FIRESTORE EN TEMPS RÉEL
+  // -------------------------------------------------------------------------
+  useEffect(() => {
+    const productsRef = collection(db, 'products');
+    
+    // onSnapshot met à jour l'état dès que le stock ou le prix change dans Firestore
+    const unsubscribe = onSnapshot(productsRef, (snapshot) => {
+      const productsList = snapshot.docs.map(doc => {
+        const data = doc.data();
+        
+        // Sécurité & Flexibilité : Si c'est le sac de 22.5 kg, on s'assure qu'il a son ID Stripe
+        if (data.weight === 22.5 && !data.stripeProductId) {
+          data.stripeProductId = "prod_UdvB3uq1YZh3YN";
+        }
+
+        return {
+          id: doc.id, // Utilise l'ID du document Firestore
+          ...data
+        };
+      });
+      
+      setProducts(productsList);
+      setLoading(false);
+    }, (error) => {
+      console.error("❌ Erreur de récupération Firestore :", error);
+      setLoading(false);
+    });
+
+    // Nettoyage de l'écouteur à la destruction du composant
+    return () => unsubscribe();
+  }, []);
 
   // 1. Fonction pour ajouter au panier
   const addToCart = (product) => {
@@ -90,7 +79,7 @@ export const ShopProvider = ({ children }) => {
   };
 
   return (
-    <ShopContext.Provider value={{ products, cart, addToCart, updateQuantity, removeFromCart, getCartTotal }}>
+    <ShopContext.Provider value={{ products, cart, addToCart, updateQuantity, removeFromCart, getCartTotal, loading }}>
       {children}
     </ShopContext.Provider>
   );
