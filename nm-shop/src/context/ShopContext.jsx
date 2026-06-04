@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 // Importation de ton instance Firebase configurée côté Frontend Vercel
-import { db } from '../firebase/config'; 
+import { db } from '../firebase'; 
 import { collection, onSnapshot } from 'firebase/firestore';
 
 // Création du contexte
