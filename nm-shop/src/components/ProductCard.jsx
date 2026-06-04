@@ -15,11 +15,12 @@ const ProductCard = ({ product, onAddToCart }) => {
     <div className="group bg-white rounded-2xl shadow-sm border border-slate-100/80 overflow-hidden hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between selection:bg-brand-primary selection:text-white">
       
       {/* 1. IMAGE DU PRODUIT + ACTIONS AU SURVOL */}
-      <div className="h-60 overflow-hidden relative bg-slate-50 border-b border-slate-100/50">
+      <div className="h-60 overflow-hidden relative bg-slate-50 border-b border-slate-100/50 p-4 flex items-center justify-center">
         <img 
           src={product.imageUrl && product.imageUrl.trim() !== "" ? product.imageUrl : defaultRiceImage} 
           alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          /* object-contain est idéal pour les sacs de riz afin d'éviter de couper l'emballage ou le texte de l'image */
+          className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
           onError={(e) => {
             // Sécurité absolue : si l'URL existe mais renvoie une erreur 404, on bascule sur le fallback
             e.target.src = defaultRiceImage;
@@ -31,9 +32,16 @@ const ProductCard = ({ product, onAddToCart }) => {
           {product.category || "Riz Premium"}
         </div>
 
+        {/* Badge du Poids (Sac en kg) */}
+        {product.weight && (
+          <div className="absolute top-3 right-3 bg-[#007A00] text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-tight shadow-2xs">
+            Sac de {product.weight.toString().replace('.', ',')} kg
+          </div>
+        )}
+
         {/* Bouton "Aperçu Rapide" */}
         <div className="absolute inset-0 bg-brand-dark/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-3xs">
-           <button className="p-3 bg-white text-brand-dark rounded-full hover:bg-brand-primary hover:text-white transition-all duration-200 shadow-lg translate-y-3 group-hover:translate-y-0 cursor-pointer">
+           <button className="p-3 bg-white text-brand-dark rounded-full hover:bg-[#007A00] hover:text-white transition-all duration-200 shadow-lg translate-y-3 group-hover:translate-y-0 cursor-pointer">
              <Eye size={16} />
            </button>
         </div>
@@ -77,7 +85,7 @@ const ProductCard = ({ product, onAddToCart }) => {
           {/* Bouton d'ajout au panier */}
           <button 
             onClick={() => onAddToCart(product)}
-            className="flex items-center justify-center h-10 w-10 bg-brand-dark hover:bg-brand-primary text-white rounded-xl transition-all duration-300 shadow-md shadow-emerald-950/5 cursor-pointer hover:scale-105 active:scale-95 group-hover:shadow-lg"
+            className="flex items-center justify-center h-10 w-10 bg-brand-dark hover:bg-[#007A00] text-white rounded-xl transition-all duration-300 shadow-md shadow-emerald-950/5 cursor-pointer hover:scale-105 active:scale-95 group-hover:shadow-lg"
             title="Ajouter au panier"
           >
             <ShoppingCart size={15} strokeWidth={2.5} />
