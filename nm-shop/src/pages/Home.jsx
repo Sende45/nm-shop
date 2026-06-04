@@ -93,7 +93,7 @@ const Home = () => {
               </span>
               <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Parfumé Premium</h3>
               <p className="text-slate-400 text-xs leading-relaxed font-semibold">
-                L'excellence du riz Jasmin importé, poli à la perfection pour sublimer toutes vos grandes réceptions familiales.
+                L'excellence du riz Nomar , poli à la perfection pour sublimer toutes vos grandes réceptions familiales.
               </p>
             </div>
             <div className="mt-12 flex items-center justify-between text-slate-900 font-black text-xs uppercase tracking-wider pt-4 border-t border-slate-100">
@@ -111,7 +111,7 @@ const Home = () => {
               </span>
               <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Terroir Local & Brisure</h3>
               <p className="text-slate-400 text-xs leading-relaxed font-semibold">
-                Le meilleur des récoltes de nos régions (Man, Gagnoa) et brisures fines de premier choix sélectionnées par NoMar.
+                Le meilleur des récoltes de nos régions (Sinfra) et brisures fines de premier choix sélectionnées par NoMar.
               </p>
             </div>
             <div className="mt-12 flex items-center justify-between text-slate-900 font-black text-xs uppercase tracking-wider pt-4 border-t border-slate-100">
