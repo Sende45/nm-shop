@@ -56,7 +56,6 @@ app.post('/webhook-stripe', express.raw({ type: 'application/json' }), async (re
       });
     } catch (error) {
       console.error(`[ERREUR COMPTABILITÉ STRIPE] : ${error.message}`);
-      // On renvoie quand même un 200 à Stripe pour éviter qu'il ne bombarde le webhook, mais on log l'erreur
     }
   }
   res.json({ received: true });
@@ -133,7 +132,7 @@ app.post('/api/payment/fedapay', async (req, res) => {
       gateway: 'fedapay',
       status: 'pending',
       items: formattedItems,
-      createdAt: admin.firestore.FieldValue.serverTimestamp() // Utilisation du FieldValue de ton instance config
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
     res.json({ url: token.url });
@@ -150,14 +149,12 @@ app.post('/webhook-fedapay', async (req, res) => {
   let event;
 
   try {
-    // Sécurisation par signature pour empêcher les fausses requêtes d'achat
     event = Webhook.constructEvent(JSON.stringify(req.body), sig, process.env.FEDAPAY_WEBHOOK_SECRET);
   } catch (err) {
     console.error(`[ERREUR WEBHOOK FEDAPAY] Signature invalide : ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Dans FedaPay, l'objet de l'événement contient l'entité modifiée
   if (event.name === 'transaction.approved') {
     const transactionData = event.entity;
     const fedaTxId = transactionData.id;
@@ -169,7 +166,6 @@ app.post('/webhook-fedapay', async (req, res) => {
       if (docSnap.exists() && docSnap.data().status === 'pending') {
         const txData = docSnap.data();
 
-        // Validation finale du document de la commande
         await transactionDocRef.update({
           status: 'completed',
           gatewayId: fedaTxId,
@@ -177,7 +173,6 @@ app.post('/webhook-fedapay', async (req, res) => {
           monthYear: `${String(new Date().getMonth() + 1).padStart(2, '0')}-${new Date().getFullYear()}`
         });
 
-        // Lancement de la comptabilité automatique et de la réduction des stocks
         await executerComptabiliteAutomatique({
           customerName: txData.customerName,
           customerPhone: txData.customerPhone,
@@ -201,7 +196,6 @@ async function executerComptabiliteAutomatique(data, isFeda = false) {
   const currentMonth = `${String(new Date().getMonth() + 1).padStart(2, '0')}-${new Date().getFullYear()}`;
   const batch = db.batch();
 
-  // Si paiement par carte (Stripe), on crée le document d'historique
   if (!isFeda) {
     const txRef = db.collection('transactions').doc();
     batch.set(txRef, {
@@ -212,7 +206,6 @@ async function executerComptabiliteAutomatique(data, isFeda = false) {
     });
   }
 
-  // Agrégation du chiffre d'affaires mensuel
   const analyticsRef = db.collection('analytics').doc(currentMonth);
   batch.set(analyticsRef, {
     monthYear: currentMonth,
@@ -221,7 +214,6 @@ async function executerComptabiliteAutomatique(data, isFeda = false) {
     lastUpdated: admin.firestore.FieldValue.serverTimestamp()
   }, { merge: true });
 
-  // Décrémentation des stocks physiques de sacs de riz
   data.items.forEach(item => {
     if (item.id) { 
       const productRef = db.collection('products').doc(item.id);
@@ -250,6 +242,7 @@ app.get('/test-firebase', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Serveur NM-Shop (NoMar) lancé avec succès sur http://localhost:${PORT}`);
+// Écoute sur 0.0.0.0 pour permettre le port binding de Render
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Serveur NM-Shop (NoMar) lancé avec succès sur le port ${PORT}`);
 });
