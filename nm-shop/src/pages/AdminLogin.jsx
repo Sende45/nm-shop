@@ -10,7 +10,7 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // 👈 LE "S" PARASITE A ÉTÉ SUPPRIMÉ ICI
 
   // Ton UID Admin Unique validé par tes règles Firestore
   const ADMIN_UID = "GjgjlebQ83PSa7qoFBdRCb67Z2E3";
