@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore"; // Ajouté
-import { getStorage } from "firebase/storage";    // Ajouté
+import { getFirestore } from "firebase/firestore"; 
+import { getStorage } from "firebase/storage";    
+import { getAuth } from "firebase/auth"; // 👈 1. AJOUT DE L'IMPORT DE L'AUTH
 
 const firebaseConfig = {
   apiKey: "AIzaSyCa0sk3zC8ez5DbncBqoPBfVzwE5tFVzCw",
@@ -15,6 +16,7 @@ const firebaseConfig = {
 // Initialisation
 const app = initializeApp(firebaseConfig);
 
-// EXPORTS : C'est ce qui permet à Admin.jsx de fonctionner
+// EXPORTS : Accessibles dans tout ton projet NoMar
 export const db = getFirestore(app);
-export const storage = getStorage(app);
+export const storage = getStorage(app); 
+export const auth = getAuth(app); // 👈 2. AJOUT DE L'EXPORT DE L'AUTH POUR ADMINLOGIN
