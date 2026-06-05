@@ -1,118 +1,140 @@
 import React, { useState } from 'react';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { db } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Mail, Eye, EyeOff, ShieldAlert } from 'lucide-react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+// 1. CORRECTION DU CHEMIN : Ton fichier s'appelle firebase.js et se trouve dans src/ (un dossier plus haut)
+import { auth } from '../firebase'; 
+import { ShieldAlert, Lock, Mail, ArrowRight, Loader2 } from 'lucide-react';
 
 const AdminLogin = () => {
-  const auth = getAuth();
-  const navigate = useNavigate();
-  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  // Ton UID Admin Unique validé par tes règles Firestore
+  const ADMIN_UID = "GjgjlebQ83PSa7qoFBdRCb67Z2E3";
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
+    setLoading(true);
 
     try {
-      // 1. Authentification Firebase
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // 1. Connexion via Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
       const user = userCredential.user;
 
-      // 2. Vérification stricte de ton UID unique NoMar
-      if (user.uid === "GjgjlebQ83PSa7qoFBdRCb67Z2E3") {
-        
-        // 3. Notification & Enregistrement de la connexion sur Firestore
-        await addDoc(collection(db, 'admin_logs'), {
-          adminEmail: user.email,
-          uid: user.uid,
-          action: "Connexion réussie au Dashboard",
-          loginAt: serverTimestamp(),
-          device: navigator.userAgent // Optionnel : pour savoir depuis quel appareil
-        });
-
-        // 4. Redirection vers le Dashboard de gestion
-        navigate('/admin/dashboard');
+      // 2. Vérification stricte de l'UID Admin NoMar
+      if (user.uid === ADMIN_UID) {
+        // Connexion réussie -> Redirection vers le tableau de bord sécurisé
+        // 2. CORRECTION DE LA ROUTE : Doit matcher exactement avec le chemin de ton App.jsx
+        navigate('/admin/dashboard'); 
       } else {
-        setError("Accès refusé : Cet identifiant n'est pas enregistré comme administrateur.");
+        // Si l'UID ne correspond pas, on déconnecte immédiatement par sécurité
+        await auth.signOut();
+        setError("Accès refusé. Vous n'êtes pas configuré comme administrateur principal.");
       }
     } catch (err) {
-      console.error(err);
-      setError("Identifiants invalides. Veuillez vérifier votre email ou mot de passe.");
+      console.error("Erreur d'authentification admin :", err);
+      // Messages d'erreur adaptés et propres
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        setError("Identifiants de connexion incorrects.");
+      } else if (err.code === 'auth/too-many-requests') {
+        setError("Compte temporairement bloqué suite à de trop nombreuses tentatives. Réessayez plus tard.");
+      } else {
+        setError("Une erreur est survenue lors de la connexion. Veuillez réessayer.");
+      }
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center p-4 bg-slate-50">
-      <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-xl max-w-md w-full transition-all">
+    <div className="min-h-[80vh] flex items-center justify-center px-4 bg-slate-50 font-sans selection:bg-[#1A6D00] selection:text-white">
+      <div className="w-full max-w-md bg-white border border-slate-100 rounded-2xl shadow-xl p-6 md:p-8 transform transition-all duration-300">
         
-        <div className="flex flex-col items-center text-center mb-8">
-          <div className="p-3 bg-emerald-50 rounded-2xl text-[#007A00] mb-3">
-            <Lock size={28} />
+        {/* En-tête du formulaire */}
+        <div className="text-center mb-8">
+          <div className="mx-auto w-12 h-12 bg-[#1A6D00]/10 text-[#1A6D00] rounded-xl flex items-center justify-center mb-4 shadow-xs">
+            <ShieldAlert size={24} />
           </div>
-          <h2 className="text-2xl font-black uppercase tracking-tight text-slate-900">Portail NM-Admin</h2>
-          <p className="text-xs text-slate-400 font-medium mt-1">Espace de restriction logistique et financier NoMar</p>
+          <h2 className="text-xl font-black uppercase text-slate-800 tracking-wide">
+            NM-Management
+          </h2>
+          <p className="text-xs text-slate-400 font-semibold mt-1">
+            Espace d'administration réservé • NoMar Shop
+          </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        {/* Message d'erreur */}
+        {error && (
+          <div className="mb-5 p-3 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-xs font-bold flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+            {error}
+          </div>
+        )}
+
+        {/* Formulaire de connexion */}
+        <form onSubmit={handleLogin} className="space-y-5">
+          
+          {/* Champ Email */}
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-400 mb-1">Identifiant de connexion</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input 
-                type="email" 
+            <label className="block text-[11px] font-black uppercase text-slate-500 tracking-wider mb-2">
+              Adresse Email Admin
+            </label>
+            <div className="relative flex items-center bg-slate-50/80 rounded-xl px-4 py-3 border border-slate-100 focus-within:border-[#1A6D00]/30 focus-within:bg-white focus-within:shadow-xs transition-all duration-200">
+              <Mail size={16} className="text-slate-400 shrink-0" />
+              <input
+                type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@nomar.ci"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#007A00] transition-colors"
+                placeholder="exemple@nomar.com"
+                className="bg-transparent border-none outline-none focus:ring-0 text-xs w-full ml-3 font-semibold text-slate-700 placeholder-slate-400"
+                disabled={loading}
               />
             </div>
           </div>
 
+          {/* Champ Mot de Passe */}
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-400 mb-1">Clé secrète / Mot de passe</label>
-            <div className="relative">
-              <input 
-                type={showPassword ? "text" : "password"} 
+            <label className="block text-[11px] font-black uppercase text-slate-500 tracking-wider mb-2">
+              Mot de passe
+            </label>
+            <div className="relative flex items-center bg-slate-50/80 rounded-xl px-4 py-3 border border-slate-100 focus-within:border-[#1A6D00]/30 focus-within:bg-white focus-within:shadow-xs transition-all duration-200">
+              <Lock size={16} className="text-slate-400 shrink-0" />
+              <input
+                type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-[#007A00] transition-colors"
+                placeholder="••••••••••••"
+                className="bg-transparent border-none outline-none focus:ring-0 text-xs w-full ml-3 font-semibold text-slate-700 placeholder-slate-400"
+                disabled={loading}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
             </div>
           </div>
 
-          {error && (
-            <div className="flex items-start gap-2 text-xs text-rose-600 font-semibold bg-rose-50 p-2.5 rounded-lg border border-rose-100">
-              <ShieldAlert size={16} className="shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="w-full bg-slate-900 hover:bg-[#007A00] disabled:bg-slate-300 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider transition-colors shadow-md cursor-pointer disabled:cursor-not-allowed"
+          {/* Bouton de Soumission */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#1A6D00] hover:bg-[#155400] text-white font-black text-xs uppercase tracking-wider py-3.5 px-4 rounded-xl shadow-md shadow-emerald-900/10 transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Vérification en cours..." : "S'authentifier"}
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Vérification des accès...
+              </>
+            ) : (
+              <>
+                Se connecter au Dashboard
+                <ArrowRight size={14} />
+              </>
+            )}
           </button>
+          
         </form>
       </div>
     </div>
