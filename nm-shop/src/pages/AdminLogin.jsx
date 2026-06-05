@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 // 1. CORRECTION DU CHEMIN : Ton fichier s'appelle firebase.js et se trouve dans src/ (un dossier plus haut)
 import { auth } from '../firebase'; 
-import { ShieldAlert, Lock, Mail, ArrowRight, Loader2 } from 'lucide-react';
+import { ShieldAlert, Lock, Mail, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react'; // 👈 AJOUT DES ICÔNES EYE ET EYEOFF
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // 👈 ÉTAT POUR GÉRER LA VISIBILITÉ DU MOT DE PASSE
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // 👈 LE "S" PARASITE A ÉTÉ SUPPRIMÉ ICI
+  const navigate = useNavigate();
 
   // Ton UID Admin Unique validé par tes règles Firestore
   const ADMIN_UID = "GjgjlebQ83PSa7qoFBdRCb67Z2E3";
@@ -102,10 +103,11 @@ const AdminLogin = () => {
             <label className="block text-[11px] font-black uppercase text-slate-500 tracking-wider mb-2">
               Mot de passe
             </label>
-            <div className="relative flex items-center bg-slate-50/80 rounded-xl px-4 py-3 border border-slate-100 focus-within:border-[#1A6D00]/30 focus-within:bg-white focus-within:shadow-xs transition-all duration-200">
+            {/* Ajout de pr-12 sur le conteneur pour laisser de la place au bouton œil à droite */}
+            <div className="relative flex items-center bg-slate-50/80 rounded-xl pl-4 pr-12 py-3 border border-slate-100 focus-within:border-[#1A6D00]/30 focus-within:bg-white focus-within:shadow-xs transition-all duration-200">
               <Lock size={16} className="text-slate-400 shrink-0" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"} // 👈 LE TYPE S'ADAPTE DYNAMIQUEMENT ICI
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -113,6 +115,15 @@ const AdminLogin = () => {
                 className="bg-transparent border-none outline-none focus:ring-0 text-xs w-full ml-3 font-semibold text-slate-700 placeholder-slate-400"
                 disabled={loading}
               />
+              {/* Bouton pour basculer l'état showPassword */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer focus:outline-none"
+                title={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 
