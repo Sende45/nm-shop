@@ -5,8 +5,8 @@ import { collection, onSnapshot } from 'firebase/firestore';
 // Création du contexte
 const ShopContext = createContext();
 
-// URL de ton backend Node.js (à adapter selon ton environnement)
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+// URL de ton backend Node.js (modifiée pour l'objet de configuration Vite)
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const ShopProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
