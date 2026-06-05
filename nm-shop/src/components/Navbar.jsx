@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, ShoppingBag, Menu, X, Phone, BookOpen, Layers, ChevronDown } from 'lucide-react';
+import { Search, ShoppingBag, Menu, X, Phone, BookOpen, Layers, ChevronDown, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useShop } from '../context/ShopContext';
 
@@ -176,7 +176,6 @@ const Navbar = () => {
           {/* CONTENEUR DE RECHERCHE AVEC SUGGESTIONS DIRECTES */}
           <div ref={searchContainerRef} className="hidden md:block relative">
             <div className="flex items-center bg-slate-50/80 rounded-xl px-4 py-2 border border-slate-100/80 focus-within:border-[#1A6D00]/30 focus-within:bg-white focus-within:shadow-xs transition-all duration-200">
-              {/* L'icône Loupe devient un bouton cliquable */}
               <button 
                 onClick={() => executeSearch()} 
                 className="text-slate-400 hover:text-[#1A6D00] transition-colors focus:outline-none cursor-pointer"
@@ -240,6 +239,7 @@ const Navbar = () => {
               </span>
             </a>
 
+            {/* BOUTON PANIER */}
             <Link to="/panier" className={`p-2.5 rounded-xl transition-all duration-200 relative flex items-center justify-center group ${isActive('/panier') ? 'bg-[#1A6D00]/10 text-[#1A6D00]' : 'hover:bg-slate-50 text-slate-500 hover:text-[#1A6D00]'}`}>
               <ShoppingBag size={19} />
               {totalItems > 0 && (
@@ -249,6 +249,23 @@ const Navbar = () => {
               )}
             </Link>
 
+            {/* NOUVEAU : BOUTON SÉCURISÉ CONNEXION ADMIN */}
+            <Link 
+              to="/admin" 
+              title="Espace Administration"
+              className={`p-2.5 rounded-xl transition-all duration-200 relative flex items-center justify-center group ${
+                isActive('/admin') || location.pathname.startsWith('/admin')
+                  ? 'bg-[#1A6D00]/10 text-[#1A6D00]' 
+                  : 'hover:bg-slate-50 text-slate-500 hover:text-[#1A6D00]'
+              }`}
+            >
+              <ShieldCheck size={19} />
+              <span className="absolute bottom-full mb-2 hidden group-hover:block bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-md font-bold tracking-wide whitespace-nowrap">
+                NM-Management
+              </span>
+            </Link>
+
+            {/* ICONE MENU BURGER MOBILE */}
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden p-2 hover:bg-slate-50 text-slate-500 rounded-xl cursor-pointer">
               {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -287,12 +304,20 @@ const Navbar = () => {
 
             <Link to="/a-propos" className="hover:text-[#1A6D00] py-1 flex items-center gap-2"><BookOpen size={14}/> Notre Histoire</Link>
             <Link to="/contact" className="hover:text-[#1A6D00] py-1 flex items-center gap-2"><Phone size={14}/> Nous Contacter</Link>
+            
             <a href="https://wa.me/2250759777796" target="_blank" rel="noopener noreferrer" className="hover:text-[#1A6D00] py-1 flex items-center gap-2">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
               </svg>
               Nous écrire sur WhatsApp
             </a>
+
+            <div className="border-t border-slate-100 my-1"></div>
+            
+            {/* ACCÈS ADMIN DANS LE MENU MOBILE */}
+            <Link to="/admin" className="hover:text-[#1A6D00] py-1 flex items-center gap-2 text-[#1A6D00]">
+              <ShieldCheck size={14}/> Espace NM-Management
+            </Link>
           </div>
         </div>
       )}
