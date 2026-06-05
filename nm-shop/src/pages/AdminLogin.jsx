@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-// 1. CORRECTION DU CHEMIN : Ton fichier s'appelle firebase.js et se trouve dans src/ (un dossier plus haut)
+// 1. CHEMIN CORRIGÉ : Fichier firebase.js situé dans src/
 import { auth } from '../firebase'; 
-import { ShieldAlert, Lock, Mail, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react'; // 👈 AJOUT DES ICÔNES EYE ET EYEOFF
+import { ShieldAlert, Lock, Mail, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // 👈 ÉTAT POUR GÉRER LA VISIBILITÉ DU MOT DE PASSE
+  const [showPassword, setShowPassword] = useState(false); 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // 👈 LE "S" PARASITE A BIEN ÉTÉ SUPPRIMÉ ICI
 
-  // Ton UID Admin Unique validé par tes règles Firestore
-  const ADMIN_UID = "GjgjlebQ83PSa7qoFBdRCb67Z2E3";
+  // 🎯 TON VRAI UID ADMIN HARMONISÉ ET CORRIGÉ ICI
+  const ADMIN_UID = "GjgjlebQ83PSa7qoFBdRCb67a123";
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -29,7 +29,6 @@ const AdminLogin = () => {
       // 2. Vérification stricte de l'UID Admin NoMar
       if (user.uid === ADMIN_UID) {
         // Connexion réussie -> Redirection vers le tableau de bord sécurisé
-        // 2. CORRECTION DE LA ROUTE : Doit matcher exactement avec le chemin de ton App.jsx
         navigate('/admin/dashboard'); 
       } else {
         // Si l'UID ne correspond pas, on déconnecte immédiatement par sécurité
@@ -103,11 +102,10 @@ const AdminLogin = () => {
             <label className="block text-[11px] font-black uppercase text-slate-500 tracking-wider mb-2">
               Mot de passe
             </label>
-            {/* Ajout de pr-12 sur le conteneur pour laisser de la place au bouton œil à droite */}
             <div className="relative flex items-center bg-slate-50/80 rounded-xl pl-4 pr-12 py-3 border border-slate-100 focus-within:border-[#1A6D00]/30 focus-within:bg-white focus-within:shadow-xs transition-all duration-200">
               <Lock size={16} className="text-slate-400 shrink-0" />
               <input
-                type={showPassword ? "text" : "password"} // 👈 LE TYPE S'ADAPTE DYNAMIQUEMENT ICI
+                type={showPassword ? "text" : "password"} 
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -115,7 +113,6 @@ const AdminLogin = () => {
                 className="bg-transparent border-none outline-none focus:ring-0 text-xs w-full ml-3 font-semibold text-slate-700 placeholder-slate-400"
                 disabled={loading}
               />
-              {/* Bouton pour basculer l'état showPassword */}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
