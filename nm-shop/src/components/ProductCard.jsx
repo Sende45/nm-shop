@@ -1,7 +1,9 @@
 import React from 'react';
 import { ShoppingCart, Star, Eye } from 'lucide-react';
+import { useShop } from '../context/ShopContext'; // Importation du hook global de confiance
 
-const ProductCard = ({ product, onAddToCart }) => {
+const ProductCard = ({ product }) => {
+  const { addToCart } = useShop(); // Utilisation directe de la logique du contexte
   
   // Formateur localisé pour un affichage propre des prix en CFA sans décimales
   const formatPrice = (amount) => {
@@ -11,8 +13,11 @@ const ProductCard = ({ product, onAddToCart }) => {
   // IMAGE DE RECOURS : Un magnifique sac de riz premium si le lien de la DB est mort ou vide
   const defaultRiceImage = "https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=600";
 
+  // Vérification de la disponibilité du stock
+  const isOutOfStock = product.stock !== undefined && product.stock <= 0;
+
   return (
-    <div className="group bg-white rounded-2xl shadow-sm border border-slate-100/80 overflow-hidden hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between selection:bg-brand-primary selection:text-white">
+    <div className={`group bg-white rounded-2xl shadow-sm border border-slate-100/80 overflow-hidden hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between selection:bg-brand-primary selection:text-white ${isOutOfStock ? 'opacity-75' : ''}`}>
       
       {/* 1. IMAGE DU PRODUIT + ACTIONS AU SURVOL */}
       <div className="h-60 overflow-hidden relative bg-slate-50 border-b border-slate-100/50 p-4 flex items-center justify-center">
@@ -32,11 +37,17 @@ const ProductCard = ({ product, onAddToCart }) => {
           {product.category || "Riz Premium"}
         </div>
 
-        {/* Badge du Poids (Sac en kg) */}
-        {product.weight && (
-          <div className="absolute top-3 right-3 bg-[#007A00] text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-tight shadow-2xs">
-            Sac de {product.weight.toString().replace('.', ',')} kg
+        {/* Badge Rupture de Stock ou Poids (Sac en kg) */}
+        {isOutOfStock ? (
+          <div className="absolute top-3 right-3 bg-rose-600 text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-tight shadow-2xs uppercase">
+            Rupture
           </div>
+        ) : (
+          product.weight && (
+            <div className="absolute top-3 right-3 bg-[#007A00] text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-tight shadow-2xs">
+              Sac de {product.weight.toString().replace('.', ',')} kg
+            </div>
+          )
         )}
 
         {/* Bouton "Aperçu Rapide" */}
@@ -84,9 +95,14 @@ const ProductCard = ({ product, onAddToCart }) => {
           
           {/* Bouton d'ajout au panier */}
           <button 
-            onClick={() => onAddToCart(product)}
-            className="flex items-center justify-center h-10 w-10 bg-brand-dark hover:bg-[#007A00] text-white rounded-xl transition-all duration-300 shadow-md shadow-emerald-950/5 cursor-pointer hover:scale-105 active:scale-95 group-hover:shadow-lg"
-            title="Ajouter au panier"
+            onClick={() => !isOutOfStock && addToCart(product)}
+            disabled={isOutOfStock}
+            className={`flex items-center justify-center h-10 w-10 text-white rounded-xl transition-all duration-300 shadow-md shadow-emerald-950/5 ${
+              isOutOfStock 
+                ? 'bg-slate-300 cursor-not-allowed shadow-none' 
+                : 'bg-brand-dark hover:bg-[#007A00] cursor-pointer hover:scale-105 active:scale-95 group-hover:shadow-lg'
+            }`}
+            title={isOutOfStock ? "Produit indisponible" : "Ajouter au panier"}
           >
             <ShoppingCart size={15} strokeWidth={2.5} />
           </button>
