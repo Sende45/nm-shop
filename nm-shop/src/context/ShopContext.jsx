@@ -82,7 +82,7 @@ export const ShopProvider = ({ children }) => {
   };
 
   // -------------------------------------------------------------------------
-  // 5. LOGIQUE DE PAIEMENT EXPRESS SANS COMPTE (Stripe & FedaPay)
+  // 5. LOGIQUE DE TRAITEMENT (Stripe, FedaPay & Espèce à la livraison)
   // -------------------------------------------------------------------------
   const handleCheckout = async (gateway, customerDetails) => {
     if (cart.length === 0) {
@@ -127,18 +127,22 @@ export const ShopProvider = ({ children }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Une erreur est survenue lors de l'initialisation du paiement.");
+        throw new Error(data.error || "Une erreur est survenue lors de l'initialisation de la commande.");
       }
 
-      if (data.url) {
+      // Si c'est un paiement en espèce (cod), le backend valide directement sans redirection externe
+      if (gateway === 'cod') {
+        window.location.href = '/commande-confirmee';
+      } else if (data.url) {
+        // Pour Stripe et FedaPay, on redirige vers leurs passerelles respectives
         window.location.href = data.url;
       } else {
         throw new Error("L'URL de redirection est manquante.");
       }
 
     } catch (error) {
-      console.error(`[ERREUR DE PAIEMENT - ${gateway.toUpperCase()}] :`, error.message);
-      alert(`Impossible d'initier le paiement : ${error.message}`);
+      console.error(`[ERREUR DE COMMANDE - ${gateway.toUpperCase()}] :`, error.message);
+      alert(`Impossible de finaliser la commande : ${error.message}`);
     } finally {
       setIsProcessingPayment(false);
     }
