@@ -9,7 +9,8 @@ import Home from './pages/Home'
 import Catalogue from './pages/Catalogue'
 import APropos from './pages/APropos' 
 import Contact from './pages/Contact' 
-import AdminAddProduct from './pages/Admin' 
+import AdminLogin from './pages/AdminLogin' // 👈 IMPORT DE LA PAGE DE CONNEXION ADMIN
+import AdminDashboard from './pages/AdminDashboard' // 👈 IMPORT DU NOUVEAU DASHBOARD
 import SuccessPage from './pages/SuccessPage' // 👈 1. ON IMPORTE LA PAGE DE SUCCÈS ICI
 
 // Import des Composants globaux
@@ -45,8 +46,11 @@ function App() {
               {/* Route Succès Paiement */}
               <Route path="/commande-confirmee" element={<SuccessPage />} /> {/* 👈 4. NOUVELLE ROUTE APRÈS PAIEMENT */}
               
-              {/* Route Admin */}
-              <Route path="/admin" element={<AdminAddProduct />} />
+              {/* Route Admin : Formulaire de connexion pour l'administrateur */}
+              <Route path="/admin" element={<AdminLogin />} /> {/* 👈 MODIFIÉ POUR LA PAGE DE LOGIN */}
+
+              {/* Route Dashboard Admin : Accès sécurisé au tableau de bord */}
+              <Route path="/admin/dashboard" element={<AdminDashboard />} /> {/* 👈 NOUVELLE ROUTE SÉCURISÉE */}
             </Routes>
           </main>
           
