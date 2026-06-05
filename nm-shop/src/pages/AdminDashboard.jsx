@@ -3,7 +3,7 @@ import { db } from '../firebase';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, onSnapshot, doc, updateDoc, query, orderBy } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { BarChart3, ShoppingBag, Package, CheckCircle, Clock, RefreshCw, Search, LogOut, ShieldAlert } from 'lucide-react';
+import { BarChart3, ShoppingBag, Package, CheckCircle, Clock, RefreshCw, Search, LogOut } from 'lucide-react';
 
 const AdminDashboard = () => {
   const auth = getAuth();
@@ -24,10 +24,11 @@ const AdminDashboard = () => {
     return new Intl.NumberFormat('fr-FR').format(amount) + ' CFA';
   };
 
-  // 1. Sécurité d'accès : Protéger la route
+  // 1. Sécurité d'accès : Protéger la route avec le VRAI UID NoMar
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser && currentUser.uid === "GjgjlebQ83PSa7qoFBdRCb67Z2E3") {
+      // 🎯 HARMONISATION DE L'UID AVEC TON IDENTIFIANT REEL (a123)
+      if (currentUser && currentUser.uid === "GjgjlebQ83PSa7qoFBdRCb67a123") {
         setUser(currentUser);
       } else {
         setUser(null);
