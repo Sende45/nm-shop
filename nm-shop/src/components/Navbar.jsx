@@ -196,6 +196,10 @@ const Navbar = () => {
             {/* Fenêtre déroulante prédictive (Autocomplete) */}
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute top-full right-0 mt-2 w-72 bg-white border border-slate-100 rounded-xl shadow-xl py-2 z-50 overflow-hidden animate-scale-up">
+                {/* MODIFICATION SÉCURITÉ ACCESSIBILITÉ POUR RADIX / SHADCN */}
+                <span className="sr-only">Suggestions de recherche</span>
+                <span className="sr-only">Liste prédictive des sacs de riz disponibles</span>
+                
                 <div className="px-3 py-1 text-[10px] font-black uppercase text-slate-400 tracking-wider border-b border-slate-50 mb-1">
                   Produits correspondants
                 </div>
